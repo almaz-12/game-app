@@ -6,11 +6,10 @@ import BaseButton from './components/BaseButton.vue';
 <template>
   <AppHeader/>
   <main class="main">
- <BaseButton>
-    Начать игру
-  </BaseButton>
+    <BaseButton>
+      Начать игру
+    </BaseButton>
   </main>
-
 </template>
 
 <style scoped>
