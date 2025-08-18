@@ -1,8 +1,25 @@
 :root {
   --color-primary: #000;
   --color-secondary: #fff;
+  --color-bg-main: #F0F4F8;
   --color-bg-button: #008BFE;
   --color-bg-button-hover: #006FCB;
   --color-bg-secondary: #CCE8FF;
   --font: "Roboto", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+    padding: 0;
+  margin: 0;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--color-bg-main);
+  font-family: var(--font);
 }
