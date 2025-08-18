@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 
 import AppIcon from '../icons/AppIcon.vue';
 
@@ -15,8 +15,9 @@ const emits = defineEmits({
 const isShowing = ref(false);
 const isSuccess = ref(false);
 const isFailed = ref(false);
-
 const isAnimating = ref(false);
+
+let animationTimer = null;
 
 function handleTurn() {
   if (isAnimating.value) return; // ← блокируем повторные клики
