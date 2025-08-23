@@ -3,6 +3,13 @@ import { ref, onUnmounted } from 'vue';
 
 import AppIcon from '../icons/AppIcon.vue';
 
+const props = defineProps({
+  data: {
+    type: Object,
+    require: true,
+  }
+})
+
 const emits = defineEmits({
   'show-answer': (payload) => {
     return typeof payload === 'boolean'
@@ -52,12 +59,12 @@ onUnmounted(() => {
   <div :class="['card', { 'active' : isShowing }]">
     <div class="card-face card-front" v-show="!isShowing">
       <div class="card__num">01</div>
-      <div class="card__text">hello</div>
+      <div class="card__text"> {{ props.data.word }}</div>
       <button class="card__btn" @click="handleTurn">ПЕРЕВЕРНУТЬ</button>
     </div>
     <div class="card-face card-back" v-show="isShowing">
       <div class="card__num">01</div>
-      <div class="card__text">привет</div>
+      <div class="card__text">{{ props.data.translation }}</div>
       <div class="card__actions">
         <button class="card__actions-btn" @click="actionFailed"><AppIcon name="Failed"/></button>
         <button class="card__actions-btn" @click="actionSuccess"><AppIcon name="Success"/></button>
