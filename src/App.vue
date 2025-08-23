@@ -5,6 +5,7 @@ import CardItem from './components/CardItem.vue';
 import { ref } from 'vue';
 
 const isStart = ref(false);
+const gameScore = ref(0);
 
 function startGame() {
   isStart.value = true;
@@ -14,11 +15,13 @@ function handleTrun(data) {
 }
 function handleGetResult(data) {
   console.log(data);
+  if(gameScore.value < 0) return;
+  (data === 'success') ? gameScore.value++ : gameScore.value--
 }
 </script>
 
 <template>
-  <AppHeader/>
+  <AppHeader :score="gameScore"/>
   <main class="main">
     <BaseButton v-if="!isStart" @click="startGame">
       Начать игру
