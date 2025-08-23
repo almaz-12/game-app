@@ -1,11 +1,18 @@
 <script setup>
 import AppScore from '../components/AppScore.vue';
+
+const props = defineProps({
+  score: {
+    type: [Number, String],
+    default: 2,
+  }
+})
 </script>
 
 <template>
   <header class="header">
     <div class="header__logo">ЗАПОМНИ СЛОВО</div>
-    <AppScore score="0"/>
+    <AppScore :score="props.score"/>
   </header>
 </template>
 

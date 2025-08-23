@@ -78,7 +78,7 @@ onUnmounted(() => {
   background: var(--color-secondary);
   color:  var(--color-primary);
   transform-style: preserve-3d;
- transition: transform 0.8s ease;
+  transition: transform 0.8s ease;
 }
 .card.active {
   transform: rotateY(180deg);
@@ -93,7 +93,6 @@ onUnmounted(() => {
   bottom: 19px;
   top: 29px;
   backface-visibility: hidden;
-  pointer-events: none;
 }
 .card::before {
   content: "";
