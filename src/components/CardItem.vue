@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, computed } from 'vue';
 
 import AppIcon from '../icons/AppIcon.vue';
 
@@ -11,26 +11,33 @@ const props = defineProps({
 })
 
 const emits = defineEmits({
-  'show-answer': (payload) => {
-    return typeof payload === 'boolean'
+  'open-card': (payload) => {
+    return typeof payload === "number"
   },
-  'process-result': (payload) => {
-    return ["success", "failed"].includes(payload)
+  'success-action': (payload) => {
+    return typeof payload === "number"
+  },
+  'failed-action': (payload) => {
+    return typeof payload === "number"
   }
 });
 
-const isShowing = ref(false);
-const isSuccess = ref(false);
-const isFailed = ref(false);
+const isShowing = computed(() => props.data.state === 'closed' ? false : true);
+const isSuccess = computed(() => props.data.status === 'success' ? true : false);
+const isFailed = computed(() => props.data.status === 'failed' ? true : false);
+const isFinish = computed(() => props.data.status === 'pending' ? true : false);
 const isAnimating = ref(false);
 
 let animationTimer = null;
 
-function handleTurn() {
+const numCard = computed(() => {
+  return props.data.id + 1;
+});
+
+function handleTurn(data) {
   if (isAnimating.value) return; // ← блокируем повторные клики
   isAnimating.value = true;
-  isShowing.value = true;
-  emits('show-answer', true);
+  emits('open-card', data);
 
   if (animationTimer) clearTimeout(animationTimer);
 
@@ -39,15 +46,11 @@ function handleTurn() {
   }, 800);
 }
 
-function actionSuccess() {
-  isSuccess.value = true;
-  isFailed.value = false;
-  emits('process-result', 'success');
+function actionSuccess(data) {
+  emits('success-action', data);
 }
-function actionFailed() {
-  isFailed.value = true;
-  isSuccess.value = false;
-  emits('process-result', 'failed');
+function actionFailed(data) {
+  emits('failed-action', data);
 }
 
 onUnmounted(() => {
@@ -58,17 +61,22 @@ onUnmounted(() => {
 <template>
   <div :class="['card', { 'active' : isShowing }]">
     <div class="card-face card-front" v-show="!isShowing">
-      <div class="card__num">01</div>
+      <div class="card__num">{{ numCard }}</div>
       <div class="card__text"> {{ props.data.word }}</div>
-      <button class="card__btn" @click="handleTurn">ПЕРЕВЕРНУТЬ</button>
+      <button class="card__btn" @click="handleTurn(props.data.id)">ПЕРЕВЕРНУТЬ</button>
     </div>
     <div class="card-face card-back" v-show="isShowing">
-      <div class="card__num">01</div>
-      <div class="card__text">{{ props.data.translation }}</div>
-      <div class="card__actions">
-        <button class="card__actions-btn" @click="actionFailed"><AppIcon name="Failed"/></button>
-        <button class="card__actions-btn" @click="actionSuccess"><AppIcon name="Success"/></button>
+      <div class="card__num">
+        {{ numCard }}
       </div>
+      <AppIcon name="Success" class="card__icon" v-if="isSuccess"/>
+      <AppIcon name="Failed" class="card__icon" v-else-if="isFailed"/>
+      <div class="card__text">{{ props.data.translation }}</div>
+      <div class="card__actions" v-if="isFinish">
+        <button class="card__actions-btn" @click="actionFailed(props.data.id)"><AppIcon name="Failed"/></button>
+        <button class="card__actions-btn" @click="actionSuccess(props.data.id)"><AppIcon name="Success"/></button>
+      </div>
+      <div v-else class="card__btn">ЗАВЕРШЕНО</div>
     </div>
   </div>
 </template>
@@ -164,5 +172,11 @@ onUnmounted(() => {
 .card__actions-btn svg {
   width: 100%;
   height:100%;
+}
+
+.card__icon {
+      position: absolute;
+    left: 40%;
+    top: -17px;
 }
 </style>
