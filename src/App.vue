@@ -3,6 +3,7 @@ import AppHeader from './layouts/AppHeader.vue';
 import BaseButton from './components/BaseButton.vue';
 import CardItem from './components/CardItem.vue';
 import { ref, onMounted } from 'vue';
+import { API_ENDPOINT, STATE_START, STATUS_START } from './common/constants';
 
 const gameScore = ref(0);
 const worldList = ref([]);
@@ -44,7 +45,7 @@ onMounted(async () => {
   try {
     errorMessage.value = null;
     isLoading.value = true;
-    const response = await fetch('http://localhost:8080/api/random-words');
+    const response = await fetch(`${API_ENDPOINT}/random-words`);
 
     if(!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`)
 
@@ -55,8 +56,8 @@ onMounted(async () => {
         worldList.value.push({
           ...item,
           id: index,
-          state: 'closed',
-          status: 'pending',
+          state: STATE_START,
+          status: STATUS_START,
         })
       })
     }
@@ -79,7 +80,7 @@ onMounted(async () => {
     <BaseButton v-else-if="!isStart" @click="startGame">
       Начать игру
     </BaseButton>
-    <div class="game-box" v-else>
+    <div class="game-box" v-else-if="worldList.length">
       <CardItem
       v-for="item in worldList"
       :key="item.id"
