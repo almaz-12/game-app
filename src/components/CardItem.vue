@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 
 import AppIcon from '../icons/AppIcon.vue';
 
@@ -28,8 +28,6 @@ const isFailed = computed(() => props.data.status === 'failed' ? true : false);
 const isFinish = computed(() => props.data.status === 'pending' ? true : false);
 const isAnimating = ref(false);
 
-let animationTimer = null;
-
 const numCard = computed(() => {
   return props.data.id + 1;
 });
@@ -38,12 +36,6 @@ function handleTurn(data) {
   if (isAnimating.value) return; // ← блокируем повторные клики
   isAnimating.value = true;
   emits('open-card', data);
-
-  if (animationTimer) clearTimeout(animationTimer);
-
-  animationTimer = setTimeout(() => {
-    isAnimating.value = false;
-  }, 800);
 }
 
 function actionSuccess(data) {
@@ -52,14 +44,10 @@ function actionSuccess(data) {
 function actionFailed(data) {
   emits('failed-action', data);
 }
-
-onUnmounted(() => {
-  if (animationTimer) clearTimeout(animationTimer);
-});
 </script>
 
 <template>
-  <div :class="['card', { 'active' : isShowing }]">
+  <div :class="['card', { 'active' : isShowing }]" @transitionend="isAnimating = false">
     <div class="card-face card-front" v-show="!isShowing">
       <div class="card__num">{{ numCard }}</div>
       <div class="card__text"> {{ props.data.word }}</div>

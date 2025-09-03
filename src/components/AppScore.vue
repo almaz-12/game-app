@@ -10,7 +10,7 @@ const props = defineProps({
 
 <template>
   <div class="score">
-    {{ score }}
+    {{ props.score }}
     <AppIcon name="Heart"/>
   </div>
 </template>

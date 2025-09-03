@@ -3,7 +3,8 @@ import AppHeader from './layouts/AppHeader.vue';
 import BaseButton from './components/BaseButton.vue';
 import GameArea from './components/GameArea.vue';
 import { ref, onMounted } from 'vue';
-import { API_ENDPOINT, SCORE_FAIL, SCORE_SUCCESS, STATE_START, STATUS_START } from './common/constants';
+import { API_ENDPOINT, SCORE_FAIL, SCORE_SUCCESS, STATE_OPENED, STATE_START, STATUS_FAILED, STATUS_START, STATUS_SUCCESS } from './common/constants';
+import { findItemById } from './composables/common';
 
 const gameScore = ref(0);
 const worldList = ref([]);
@@ -17,28 +18,30 @@ function startGame() {
   gameScore.value = 0;
 }
 function handleTrun(id) {
-  const item = worldList.value.find(item => item.id === id);
+  const item = findItemById(worldList, id);
   if(item) {
-    item.state = 'opened';
+    item.state = STATE_OPENED;
   }
 }
 function handleSuccessResult(id) {
   if(gameScore.value < 0) return;
-  gameScore.value = gameScore.value + SCORE_SUCCESS
 
-  const item = worldList.value.find(item => item.id === id);
-  if(item) {
-    item.status = 'success';
-  }
+  const item = findItemById(worldList, id);
+
+  if (!item || item.status !== STATUS_START) return;
+
+  gameScore.value += SCORE_SUCCESS
+  item.status = STATUS_SUCCESS;
 }
 function handleFailedResult(id) {
   if(gameScore.value < 0) return;
-  gameScore.value = gameScore.value - SCORE_FAIL
 
-  const item = worldList.value.find(item => item.id === id);
-  if(item) {
-    item.status = 'failed';
-  }
+  const item = findItemById(worldList, id);
+
+  if (!item || item.status !== STATUS_START) return;
+
+  gameScore.value -= SCORE_FAIL
+  item.status = STATUS_FAILED
 }
 
 async function handleRestart() {
@@ -58,15 +61,18 @@ async function fetchData() {
 
     const data = await response.json();
 
+    if (!data || !data.length) {
+      errorMessage.value = 'Не получены данные для игры';
+      return [];
+    }
+
     if(data.length) {
-      data.map((item,index) => {
-        worldList.value.push({
-          ...item,
-          id: index,
-          state: STATE_START,
-          status: STATUS_START,
-        })
-      })
+      worldList.value = data.map((item, index) => ({
+        ...item,
+        id: index,
+        state: STATE_START,
+        status: STATUS_START,
+      }));
     }
 
     return data;
