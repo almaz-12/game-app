@@ -1,9 +1,9 @@
 <script setup>
 import AppHeader from './layouts/AppHeader.vue';
 import BaseButton from './components/BaseButton.vue';
-import CardItem from './components/CardItem.vue';
+import GameArea from './components/GameArea.vue';
 import { ref, onMounted } from 'vue';
-import { API_ENDPOINT, STATE_START, STATUS_START } from './common/constants';
+import { API_ENDPOINT, SCORE_FAIL, SCORE_SUCCESS, STATE_START, STATUS_START } from './common/constants';
 
 const gameScore = ref(0);
 const worldList = ref([]);
@@ -24,7 +24,7 @@ function handleTrun(id) {
 }
 function handleSuccessResult(id) {
   if(gameScore.value < 0) return;
-  gameScore.value++
+  gameScore.value = gameScore.value + SCORE_SUCCESS
 
   const item = worldList.value.find(item => item.id === id);
   if(item) {
@@ -33,7 +33,7 @@ function handleSuccessResult(id) {
 }
 function handleFailedResult(id) {
   if(gameScore.value < 0) return;
-  gameScore.value--
+  gameScore.value = gameScore.value - SCORE_FAIL
 
   const item = worldList.value.find(item => item.id === id);
   if(item) {
@@ -41,10 +41,17 @@ function handleFailedResult(id) {
   }
 }
 
-onMounted(async () => {
+async function handleRestart() {
+  isStart.value = true;
+  gameScore.value = 0;
+  await fetchData();
+}
+
+async function fetchData() {
   try {
     errorMessage.value = null;
     isLoading.value = true;
+    worldList.value = [];
     const response = await fetch(`${API_ENDPOINT}/random-words`);
 
     if(!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`)
@@ -69,6 +76,10 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+onMounted(async () => {
+  await fetchData();
 })
 </script>
 
@@ -80,16 +91,14 @@ onMounted(async () => {
     <BaseButton v-else-if="!isStart" @click="startGame">
       Начать игру
     </BaseButton>
-    <div class="game-box" v-else-if="worldList.length">
-      <CardItem
-      v-for="item in worldList"
-      :key="item.id"
-      :data="item"
-      @open-card="handleTrun"
+    <GameArea
+      v-else-if="worldList.length"
+      :data="worldList"
+      @handle-turn="handleTrun"
       @success-action="handleSuccessResult"
       @failed-action="handleFailedResult"
+      @restart-game="handleRestart"
     />
-    </div>
   </main>
 </template>
 
@@ -101,12 +110,5 @@ onMounted(async () => {
   max-width: 1200px;
   margin: auto;
   padding: 0 15px 50px;
-}
-
-.game-box {
-  display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(4, 1fr);
-  width: 100%;
 }
 </style>
